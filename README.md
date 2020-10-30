@@ -9,26 +9,26 @@ All needed methods are located in the class called Ads, all methods are static s
 
 First you have to call Ads.init(), this method initialize Firebase AdMob, all parameters from this method are optional, if you don't pass any parameter, all IDs will be testAdunit.
 
-    ```
+```dart
   await Ads.init(nativeAds: true); // Normally called on main.dart
-    ´´´
+```
 
 Before showing the ads for the first it's necessary to load them except for native ads. (I call them on main.dart)
 
-    ```
+```dart
   await Ads.loadBanner();
   await Ads.loadInterstitial();
   await Ads.loadRewardedVideo();
-    ´´´
+```
 
 After that you can call Ads.showSomething to show your ads.
 
-    ```
+```dart
   Ads.showBanner();
   Ads.showInterstitialAd();
   Ads.showRewarded();
   Ads.showBanner();
-    ´´´
+```
 
 ## Native Ads
 
