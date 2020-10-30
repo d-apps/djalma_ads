@@ -1,6 +1,6 @@
 name: djalma_ads
 description: A package to help calling Ad methods.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/d-apps/djalma_ads
 
 environment:
