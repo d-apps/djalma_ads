@@ -1,6 +1,6 @@
 name: djalma_ads
 description: A package to help calling Ad methods.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/d-apps/djalma_ads
 
 environment:
@@ -13,6 +13,7 @@ dependencies:
 
   firebase_admob: ">=0.10.0+2 <1.0.0"
   native_flutter_admob: ">=0.2.0 <1.0.0"
+  flutter_admob_app_open: ">=0.0.5 <1.0.0"
 
 dev_dependencies:
   flutter_test:

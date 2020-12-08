@@ -3,95 +3,102 @@ import 'dart:io';
 import 'package:djalma_ads/djalma_ads.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_admob_app_open/flutter_admob_app_open.dart';
 import 'package:native_flutter_admob/native_flutter_admob.dart';
 
 class Ads {
 
   // ignore: non_constant_identifier_names
-  static String APP_ID;
+  static String APP_ID = "";
   // ignore: non_constant_identifier_names
-  static String BANNER_ID;
+  static String BANNER_ID = "";
   // ignore: non_constant_identifier_names
-  static String INTERSTITIAL_ID;
+  static String INTERSTITIAL_ID = "";
   // ignore: non_constant_identifier_names
-  static String REWARDED_ID;
+  static String REWARDED_ID = "";
   // ignore: non_constant_identifier_names
-  static String NATIVE_ID;
+  static String NATIVE_ID = "";
+  // ignore: non_constant_identifier_names
+  static String APPOPEN_ID = "";
 
-  static bool debug; // If debug is true, Ads listeners will print Ad Events.
+  static bool debug = false; // If debug is true, Ads listeners will print Ad Events.
 
-  static Future init({String appId, String bannerId, String interstitialId,
-                      String rewardedId, String nativeId, bool analytics,
-                      bool debug, bool nativeAds = false}) async {
+  static var mobileTargetingInfo; // TargetingInfo
+
+  static Future init(List<String> testDevices, {String appId = "", String bannerId = "",
+                      String interstitialId = "", String rewardedId = "", String nativeId = "",
+                      bool analytics = false, bool debug = false, bool nativeAds = false,
+                      /*bool appOpen = false, String appOpenId = "",*/ }) async {
 
     // Set id for all type of ads
 
-    APP_ID = appId??getAppId();
-    BANNER_ID = bannerId??getBannerAdUnitId();
-    INTERSTITIAL_ID = interstitialId??getInterstitialAdUnitId();
-    REWARDED_ID = rewardedId??getRewardedAdUnitId();
-    NATIVE_ID = nativeId??getNativeAdUnitId();
+    APP_ID = appId.isEmpty?getAppId():appId;
+    BANNER_ID = bannerId.isEmpty?getBannerAdUnitId():bannerId;
+    INTERSTITIAL_ID = interstitialId.isEmpty?getInterstitialAdUnitId():interstitialId;
+    REWARDED_ID = rewardedId.isEmpty?getRewardedAdUnitId():rewardedId;
+    NATIVE_ID = nativeId.isEmpty?getNativeAdUnitId():nativeId;
+    //APPOPEN_ID = appOpenId.isEmpty?getAppOpenAdUnitId():appOpenId;
 
-    Ads.debug = debug??true;
+    Ads.debug = debug;
+
+    mobileTargetingInfo = MobileAdTargetingInfo(
+      testDevices: testDevices
+    );
 
     // Initialize AdMob
-    await FirebaseAdMob.instance.initialize(appId: APP_ID, analyticsEnabled: analytics??false);
+    await FirebaseAdMob.instance.initialize(appId: APP_ID, analyticsEnabled: analytics);
 
     // Initialization for native ads
     if(nativeAds){
       await NativeAdmob().initialize(appID: APP_ID);
     }
 
+    // Initialization App Open
+    /*
+    if(appOpen){
+      await FlutterAdmobAppOpen.instance.initialize(
+        appId: APP_ID,
+        appAppOpenAdUnitId: APPOPEN_ID,
+        targetingInfo: mobileTargetingInfo
+      );
+    }
+     */
+
 
   }
 
-  static BannerAd bannerAd;
-  static InterstitialAd interstitialAd;
+  static BannerAd bannerAd = BannerAd(adUnitId: "", size: AdSize.smartBanner);
+  static InterstitialAd interstitialAd = InterstitialAd();
 
-  static Future loadBanner() async {
+
+  static Future showBanner({double anchorOffset = 0, double horizontalCenterOffset = 0, AnchorType anchorType = AnchorType.bottom}) async{
 
     bannerAd = BannerAd(
-      adUnitId: BANNER_ID,
-      size: AdSize.smartBanner,
-      listener: (MobileAdEvent mobileAdEvent){
+        adUnitId: BANNER_ID,
+        size: AdSize.smartBanner,
+        targetingInfo: mobileTargetingInfo,
+        listener: (MobileAdEvent mobileAdEvent){
 
-        if(debug){
-          print("Banner event: $mobileAdEvent");
+          if(debug){
+            print("Banner event: $mobileAdEvent");
+          }
+
         }
-
-      }
     );
 
     await bannerAd.load();
 
-  }
-
-  static Future showBanner({double anchorOffset, double horizontalCenterOffset, AnchorType anchorType}) async{
-
-    if(bannerAd == null){
-
-      await loadBanner().then((_) => bannerAd.show(
-          anchorOffset: anchorOffset??0,
-          anchorType: anchorType??AnchorType.bottom,
-          horizontalCenterOffset: horizontalCenterOffset??0
-      ));
-
-    } else {
-
-      bannerAd.show(
-          anchorOffset: anchorOffset??0,
-          anchorType: anchorType??AnchorType.bottom,
-          horizontalCenterOffset: horizontalCenterOffset??0
-      );
-
-    }
+    bannerAd.show(
+        anchorOffset: anchorOffset,
+        anchorType: anchorType,
+        horizontalCenterOffset: horizontalCenterOffset
+    );
 
   }
 
   static void closeBanner(){
 
     bannerAd.dispose();
-    bannerAd = null;
 
   }
 
@@ -101,6 +108,7 @@ class Ads {
 
     interstitialAd = InterstitialAd(
       adUnitId: INTERSTITIAL_ID,
+      targetingInfo: mobileTargetingInfo,
       listener: (MobileAdEvent mobileAdEvent){
 
         if(mobileAdEvent == MobileAdEvent.closed){
@@ -125,15 +133,15 @@ class Ads {
 
   // ==========================
 
-  static Future loadRewardedVideo({Function function}) async {
+  static Future loadRewardedVideo(Function function) async {
 
     await RewardedVideoAd.instance.load(adUnitId: REWARDED_ID);
 
-    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}){
+    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType = "", int rewardAmount = 0}){
 
-      if(function != null){
-        function();
-      }
+
+     function();
+
 
       if(event == RewardedVideoAdEvent.closed){
 
@@ -157,72 +165,66 @@ class Ads {
   // ==========================
 
   static NativeAdmobBannerView getNativeAdmobBannerView(
-      {EdgeInsets contentPadding, bool showMedia, BannerStyle bannerStyle}){
+      {EdgeInsets contentPadding = const EdgeInsets.all(8), bool showMedia = true, BannerStyle bannerStyle = BannerStyle.light}){
 
     return NativeAdmobBannerView(
       adUnitID: NATIVE_ID,
-      contentPadding: contentPadding??EdgeInsets.all(8.0),
-      showMedia: showMedia??true,
-      style: bannerStyle??BannerStyle.dark,
+      contentPadding: contentPadding,
+      showMedia: showMedia,
+      style: bannerStyle,
     );
 
   }
 
  // ==========================
 
-  static String getAppId() {
+  static getAppId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544~1458002511';
     } else if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544~3347511713';
     }
-    return null;
+
   }
 
-  static String getBannerAdUnitId() {
+  static getBannerAdUnitId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/2934735716';
     } else if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544/6300978111';
     }
-    return null;
   }
 
-  static String getInterstitialAdUnitId() {
+  static getInterstitialAdUnitId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/4411468910';
     } else if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544/1033173712';
     }
-    return null;
+
   }
 
-  static String getRewardedAdUnitId() {
+  static getRewardedAdUnitId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/1712485313';
     } else if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544/5224354917';
     }
-    return null;
+
   }
 
-  static String getNativeAdUnitId() {
+  static getNativeAdUnitId() {
+
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/3986624511';
     } else if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544/2247696110';
     }
-    return null;
+  }
+
+  static String getAppOpenAdUnitId() {
+    return FlutterAdmobAppOpen.testAppOpenAdId;
   }
 
 
 }
-
-  MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
-
-    testDevices: <String>[
-      "628CA97E938A7C380582DBF6F53279A1",
-      "FC24EF68A748928ED0DBB45F3B2DA749",
-    ], // Android emulators are considered test devices
-
-  );

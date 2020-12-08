@@ -6,10 +6,16 @@ void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Ads.init(nativeAds: true);
-  await Ads.loadBanner();
+  await Ads.init(
+    ["FC24EF68A748928ED0DBB45F3B2DA749"], // List of Test Devices ID
+    nativeAds: true,
+    debug: true,
+  );
+
   await Ads.loadInterstitial();
-  await Ads.loadRewardedVideo();
+  await Ads.loadRewardedVideo(
+          (){}, // Rewarded Function
+  );
 
   runApp(MyApp());
 }
