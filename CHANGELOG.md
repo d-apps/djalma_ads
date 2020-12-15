@@ -1,3 +1,7 @@
+## [0.0.5] - Update.
+
+* Changed EdgeInsets default parameter to EdgeInsets.all(0) on padding for Native Ads.
+
 ## [0.0.4] - Update.
 
 * Added option to add Test Device ID and Testing App Open Ads (Not available yet).

@@ -165,7 +165,7 @@ class Ads {
   // ==========================
 
   static NativeAdmobBannerView getNativeAdmobBannerView(
-      {EdgeInsets contentPadding = const EdgeInsets.all(8), bool showMedia = true, BannerStyle bannerStyle = BannerStyle.light}){
+      {EdgeInsets contentPadding = const EdgeInsets.all(0), bool showMedia = true, BannerStyle bannerStyle = BannerStyle.light}){
 
     return NativeAdmobBannerView(
       adUnitID: NATIVE_ID,
