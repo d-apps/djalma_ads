@@ -28,15 +28,11 @@ After that you can call Ads.showSomething to show your ads.
   Ads.showRewarded();
 ```
 
-## Native Ads
+## getMargin
 
-For native ads please check the example (native_ad_screen.dart) to understand how native ads works, the widget you'll need to call is
+Method to get the height of smart banner for different devices.
 
 ```dart
-getNativeAdmobBannerView()
+Container(margin: EsdgeInsets.only(bottom: getMargin(context)))
 ```
-
-## App Open Ads
-
-Testing Flutter brigde to support App Open Beta, it uses the package flutter_admob_app_open. (Not available yet)
 

@@ -1,6 +1,6 @@
 name: djalma_ads
-description: A package to help calling Ad methods.
-version: 0.0.5
+description: A package to help calling AdMob Ads.
+version: 0.0.6
 homepage: https://github.com/d-apps/djalma_ads
 
 environment:
