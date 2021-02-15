@@ -1,85 +1,69 @@
 import 'dart:io';
-
 import 'package:djalma_ads/djalma_ads.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_admob_app_open/flutter_admob_app_open.dart';
-import 'package:native_flutter_admob/native_flutter_admob.dart';
 
 class Ads {
 
   // ignore: non_constant_identifier_names
-  static String APP_ID = "";
+  static String _APP_ID = "";
   // ignore: non_constant_identifier_names
-  static String BANNER_ID = "";
+  static String _BANNER_ID = "";
   // ignore: non_constant_identifier_names
-  static String INTERSTITIAL_ID = "";
+  static String _INTERSTITIAL_ID = "";
   // ignore: non_constant_identifier_names
-  static String REWARDED_ID = "";
+  static String _REWARDED_ID = "";
   // ignore: non_constant_identifier_names
-  static String NATIVE_ID = "";
-  // ignore: non_constant_identifier_names
-  static String APPOPEN_ID = "";
+  //static String _NATIVE_ID = "";
 
-  static bool debug = false; // If debug is true, Ads listeners will print Ad Events.
+  static bool _debug = false; // If debug is true, Ads listeners will print Ad events.
 
-  static var mobileTargetingInfo; // TargetingInfo
+  static MobileAdTargetingInfo _mobileTargetingInfo; // TargetingInfo
 
-  static Future init(List<String> testDevices, {String appId = "", String bannerId = "",
-                      String interstitialId = "", String rewardedId = "", String nativeId = "",
-                      bool analytics = false, bool debug = false, bool nativeAds = false,
-                      /*bool appOpen = false, String appOpenId = "",*/ }) async {
+  static Future init(List<String> testDevices, {
+    String appId = "",
+    String bannerId = "",
+    String interstitialId = "",
+    String rewardedId = "",
+    //String nativeId = "",
+    bool analytics = false,
+    bool debug = false,
+    MobileAdTargetingInfo targetingInfo,
+    }) async {
 
     // Set id for all type of ads
 
-    APP_ID = appId.isEmpty?getAppId():appId;
-    BANNER_ID = bannerId.isEmpty?getBannerAdUnitId():bannerId;
-    INTERSTITIAL_ID = interstitialId.isEmpty?getInterstitialAdUnitId():interstitialId;
-    REWARDED_ID = rewardedId.isEmpty?getRewardedAdUnitId():rewardedId;
-    NATIVE_ID = nativeId.isEmpty?getNativeAdUnitId():nativeId;
-    //APPOPEN_ID = appOpenId.isEmpty?getAppOpenAdUnitId():appOpenId;
-
-    Ads.debug = debug;
-
-    mobileTargetingInfo = MobileAdTargetingInfo(
-      testDevices: testDevices
-    );
+    _APP_ID = appId.isEmpty ? getAppTestId() : appId;
+    _BANNER_ID = bannerId.isEmpty ? getBannerTestAdUnitId() : bannerId;
+    _INTERSTITIAL_ID = interstitialId.isEmpty ? getInterstitialTestAdUnitId() : interstitialId;
+    _REWARDED_ID = rewardedId.isEmpty ? getRewardedTestAdUnitId() : rewardedId;
+    //_NATIVE_ID = nativeId.isEmpty ? getNativeTestAdUnitId() : nativeId;
+    _mobileTargetingInfo = targetingInfo ?? MobileAdTargetingInfo(testDevices: testDevices);
+    Ads._debug = debug;
 
     // Initialize AdMob
-    await FirebaseAdMob.instance.initialize(appId: APP_ID, analyticsEnabled: analytics);
-
-    // Initialization for native ads
-    if(nativeAds){
-      await NativeAdmob().initialize(appID: APP_ID);
-    }
-
-    // Initialization App Open
-    /*
-    if(appOpen){
-      await FlutterAdmobAppOpen.instance.initialize(
-        appId: APP_ID,
-        appAppOpenAdUnitId: APPOPEN_ID,
-        targetingInfo: mobileTargetingInfo
-      );
-    }
-     */
-
+    await FirebaseAdMob.instance.initialize(appId: _APP_ID, analyticsEnabled: analytics);
 
   }
 
-  static BannerAd bannerAd = BannerAd(adUnitId: "", size: AdSize.smartBanner);
-  static InterstitialAd interstitialAd = InterstitialAd();
+  // ======== Banner Ad =========
 
+  static BannerAd bannerAd;
+  static InterstitialAd interstitialAd;
 
-  static Future showBanner({double anchorOffset = 0, double horizontalCenterOffset = 0, AnchorType anchorType = AnchorType.bottom}) async{
+  static Future showBanner({
+    AdSize adSize = AdSize.smartBanner,
+    double anchorOffset = 0,
+    double horizontalCenterOffset = 0,
+    AnchorType anchorType = AnchorType.bottom}) async{
 
     bannerAd = BannerAd(
-        adUnitId: BANNER_ID,
-        size: AdSize.smartBanner,
-        targetingInfo: mobileTargetingInfo,
+        adUnitId: _BANNER_ID,
+        size: adSize,
+        targetingInfo: _mobileTargetingInfo,
         listener: (MobileAdEvent mobileAdEvent){
 
-          if(debug){
+          if(_debug){
             print("Banner event: $mobileAdEvent");
           }
 
@@ -89,33 +73,35 @@ class Ads {
     await bannerAd.load();
 
     bannerAd.show(
-        anchorOffset: anchorOffset,
-        anchorType: anchorType,
-        horizontalCenterOffset: horizontalCenterOffset
+        anchorOffset: anchorOffset, // Posição Y
+        anchorType: anchorType, // Where the ad will start
+        horizontalCenterOffset: horizontalCenterOffset // Posição X
     );
 
   }
 
   static void closeBanner(){
 
-    bannerAd.dispose();
+    if(bannerAd != null){
+      bannerAd.dispose();
+    }
 
   }
 
-  // ====================
+  // ========= Interstitial Ad ===========
 
   static Future loadInterstitial() async {
 
     interstitialAd = InterstitialAd(
-      adUnitId: INTERSTITIAL_ID,
-      targetingInfo: mobileTargetingInfo,
+      adUnitId: _INTERSTITIAL_ID,
+      targetingInfo: _mobileTargetingInfo,
       listener: (MobileAdEvent mobileAdEvent){
 
         if(mobileAdEvent == MobileAdEvent.closed){
           loadInterstitial();
         }
 
-        if(debug){
+        if(_debug){
           print("Interstitial event: $mobileAdEvent");
         }
       }
@@ -125,32 +111,44 @@ class Ads {
 
   }
 
-  static void showInterstitial(){
+  static void showInterstitial({
+    double anchorOffset = 0,
+    double horizontalCenterOffset = 0,
+    AnchorType anchorType = AnchorType.bottom}){
 
-    interstitialAd.show();
+    interstitialAd.show(
+        anchorOffset: anchorOffset,
+        anchorType: anchorType,
+        horizontalCenterOffset: horizontalCenterOffset
+    );
 
   }
 
-  // ==========================
+  // ============ Rewarded Ad ==============
 
-  static Future loadRewardedVideo(Function function) async {
+  static Future loadRewardedVideo({Function onRewarded}) async {
 
-    await RewardedVideoAd.instance.load(adUnitId: REWARDED_ID);
+    await RewardedVideoAd.instance.load(
+        adUnitId: _REWARDED_ID, targetingInfo: _mobileTargetingInfo
+    );
 
-    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType = "", int rewardAmount = 0}){
+    RewardedVideoAd.instance.listener =
+        (RewardedVideoAdEvent event, {String rewardType = "coin", int rewardAmount = 0}){
 
-
-     function();
-
+      if(event == RewardedVideoAdEvent.rewarded){
+        if(onRewarded != null){
+          onRewarded();
+        }
+      }
 
       if(event == RewardedVideoAdEvent.closed){
 
-        RewardedVideoAd.instance.load(adUnitId: REWARDED_ID)
-            .catchError((e) => print("Error while loading another REWARDED AD!"));
+        // Retrieve a new Rewarded Video Ad when user close
+        RewardedVideoAd.instance.load(adUnitId: _REWARDED_ID);
 
       }
 
-      if(debug){
+      if(_debug){
         print("RewardedVideo event: $event");
       }
 
@@ -162,23 +160,26 @@ class Ads {
     RewardedVideoAd.instance.show();
   }
 
-  // ==========================
+  // ============ Native Ad ==============
 
-  static NativeAdmobBannerView getNativeAdmobBannerView(
-      {EdgeInsets contentPadding = const EdgeInsets.all(0), bool showMedia = true, BannerStyle bannerStyle = BannerStyle.light}){
+  /*
+  static NativeAd getNativeAd(){
 
-    return NativeAdmobBannerView(
-      adUnitID: NATIVE_ID,
-      contentPadding: contentPadding,
-      showMedia: showMedia,
-      style: bannerStyle,
+    return NativeAd(
+      //adUnitId: _NATIVE_ID,
+      factoryId: "",
+      targetingInfo: _mobileTargetingInfo,
+      listener: ((event){
+
+      })
     );
 
   }
+   */
 
- // ==========================
+ // ============ Test Ad Unit Ids ==============
 
-  static getAppId() {
+  static getAppTestId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544~1458002511';
     } else if (Platform.isAndroid) {
@@ -187,7 +188,7 @@ class Ads {
 
   }
 
-  static getBannerAdUnitId() {
+  static getBannerTestAdUnitId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/2934735716';
     } else if (Platform.isAndroid) {
@@ -195,7 +196,7 @@ class Ads {
     }
   }
 
-  static getInterstitialAdUnitId() {
+  static getInterstitialTestAdUnitId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/4411468910';
     } else if (Platform.isAndroid) {
@@ -204,7 +205,7 @@ class Ads {
 
   }
 
-  static getRewardedAdUnitId() {
+  static getRewardedTestAdUnitId() {
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/1712485313';
     } else if (Platform.isAndroid) {
@@ -213,7 +214,7 @@ class Ads {
 
   }
 
-  static getNativeAdUnitId() {
+  static getNativeTestAdUnitId() {
 
     if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/3986624511';
@@ -222,8 +223,28 @@ class Ads {
     }
   }
 
-  static String getAppOpenAdUnitId() {
-    return FlutterAdmobAppOpen.testAppOpenAdId;
+  // Get smart banner margin
+  static double getMargin(BuildContext context){
+
+    double height = MediaQuery.of(context).size.height;
+    double margin = 0;
+
+    if(height <= 400){
+
+      margin = 32;
+
+    } else if(height > 400 && height <= 720){
+
+      margin = 60;
+
+    } else if(height > 720){
+
+      margin = 90;
+
+    }
+
+    return margin;
+
   }
 
 
