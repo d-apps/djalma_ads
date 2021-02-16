@@ -1,3 +1,5 @@
+## [0.1.6] - Added coin icon as an example to increase when rewarded video reward the user.
+
 ## [0.0.6] - Fix and update.
 
 * - Update firebase_admob plugin to the latest version.

@@ -1,11 +1,11 @@
 name: djalma_ads
 description: A package to help calling AdMob Ads.
-version: 0.0.6
+version: 0.1.6
 homepage: https://github.com/d-apps/djalma_ads
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0 <2.0.0"
+  flutter: ">=1.17.0"
 
 dependencies:
   flutter:

@@ -30,6 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   firebase_admob: ^0.11.0+1
   firebase_core: ^0.7.0
+  font_awesome_flutter: ^8.11.0
   djalma_ads:
     path: ../
 
