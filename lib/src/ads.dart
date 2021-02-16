@@ -20,7 +20,7 @@ class Ads {
 
   static MobileAdTargetingInfo _mobileTargetingInfo; // TargetingInfo
 
-  static Future init(List<String> testDevices, {
+  static Future<void> init(List<String> testDevices, {
     String appId = "",
     String bannerId = "",
     String interstitialId = "",
@@ -51,7 +51,7 @@ class Ads {
   static BannerAd bannerAd;
   static InterstitialAd interstitialAd;
 
-  static Future showBanner({
+  static Future<void> showBanner({
     AdSize adSize = AdSize.smartBanner,
     double anchorOffset = 0,
     double horizontalCenterOffset = 0,
@@ -90,7 +90,7 @@ class Ads {
 
   // ========= Interstitial Ad ===========
 
-  static Future loadInterstitial() async {
+  static Future<void> loadInterstitial() async {
 
     interstitialAd = InterstitialAd(
       adUnitId: _INTERSTITIAL_ID,
@@ -126,7 +126,7 @@ class Ads {
 
   // ============ Rewarded Ad ==============
 
-  static Future loadRewardedVideo({Function onRewarded}) async {
+  static Future<void> loadRewardedVideo({Function onRewarded}) async {
 
     await RewardedVideoAd.instance.load(
         adUnitId: _REWARDED_ID, targetingInfo: _mobileTargetingInfo

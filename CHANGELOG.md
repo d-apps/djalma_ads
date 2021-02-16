@@ -1,3 +1,7 @@
+## [0.1.8] - Fixed Future methods returning dynamic to void
+
+## [0.1.7] - Fixed rea dme.
+
 ## [0.1.6] - Added coin icon as an example to increase when rewarded video reward the user.
 
 ## [0.0.6] - Fix and update.
