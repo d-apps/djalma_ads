@@ -8,24 +8,35 @@ class Ads {
   // ignore: non_constant_identifier_names
   static String _APP_ID = "";
   // ignore: non_constant_identifier_names
-  static String _BANNER_ID = "";
+  static String _ANDROID_APP_ID = "";
   // ignore: non_constant_identifier_names
-  static String _INTERSTITIAL_ID = "";
+  static String _IOS_APP_ID = "";
   // ignore: non_constant_identifier_names
-  static String _REWARDED_ID = "";
+  static String _ANDROID_BANNER_ID = "";
   // ignore: non_constant_identifier_names
-  //static String _NATIVE_ID = "";
+  static String _IOS_BANNER_ID = "";
+  // ignore: non_constant_identifier_names
+  static String _ANDROID_INTERSTITIAL_ID = "";
+  // ignore: non_constant_identifier_names
+  static String _IOS_INTERSTITIAL_ID = "";
+  // ignore: non_constant_identifier_names
+  static String _ANDROID_REWARDED_ID = "";
+  // ignore: non_constant_identifier_names
+  static String _IOS_REWARDED_ID = "";
 
   static bool _debug = false; // If debug is true, Ads listeners will print Ad events.
 
-  static MobileAdTargetingInfo _mobileTargetingInfo; // TargetingInfo
+  static MobileAdTargetingInfo _mobileTargetingInfo = MobileAdTargetingInfo(); // TargetingInfo
 
-  static Future<void> init(List<String> testDevices, {
-    String appId = "",
-    String bannerId = "",
-    String interstitialId = "",
-    String rewardedId = "",
-    //String nativeId = "",
+  static Future<void> init({
+    String androidAppId = "",
+    String androidBannerId = "",
+    String androidInterstitialId = "",
+    String androidRewardedId = "",
+    String iosAppId = "",
+    String iosBannerId = "",
+    String iosInterstitialId = "",
+    String iosRewardedId = "",
     bool analytics = false,
     bool debug = false,
     MobileAdTargetingInfo targetingInfo,
@@ -33,13 +44,27 @@ class Ads {
 
     // Set id for all type of ads
 
-    _APP_ID = appId.isEmpty ? getAppTestId() : appId;
-    _BANNER_ID = bannerId.isEmpty ? getBannerTestAdUnitId() : bannerId;
-    _INTERSTITIAL_ID = interstitialId.isEmpty ? getInterstitialTestAdUnitId() : interstitialId;
-    _REWARDED_ID = rewardedId.isEmpty ? getRewardedTestAdUnitId() : rewardedId;
-    //_NATIVE_ID = nativeId.isEmpty ? getNativeTestAdUnitId() : nativeId;
-    _mobileTargetingInfo = targetingInfo ?? MobileAdTargetingInfo(testDevices: testDevices);
+    _ANDROID_APP_ID = androidAppId.isEmpty ? getAppTestId() : androidAppId;
+    _ANDROID_BANNER_ID = androidBannerId.isEmpty ? getBannerTestAdUnitId() : androidBannerId;
+    _ANDROID_INTERSTITIAL_ID = androidInterstitialId.isEmpty ? getInterstitialTestAdUnitId() : androidInterstitialId;
+    _ANDROID_REWARDED_ID = androidRewardedId.isEmpty ? getRewardedTestAdUnitId() : androidRewardedId;
+
+    _IOS_APP_ID = iosAppId.isEmpty ? getAppTestId() : iosAppId;
+    _IOS_BANNER_ID = iosBannerId.isEmpty ? getBannerTestAdUnitId() : iosBannerId;
+    _IOS_INTERSTITIAL_ID = iosInterstitialId.isEmpty ? getInterstitialTestAdUnitId() : iosInterstitialId;
+    _IOS_REWARDED_ID = iosRewardedId.isEmpty ? getRewardedTestAdUnitId() : iosRewardedId;
+
+    if(targetingInfo != null){
+      _mobileTargetingInfo = targetingInfo;
+    }
+
     Ads._debug = debug;
+
+    if(Platform.isAndroid){
+      _APP_ID = androidAppId.isEmpty ? getAppTestId() : androidAppId;
+    } else if(Platform.isIOS){
+      _APP_ID = iosAppId.isEmpty ? getAppTestId() : iosAppId;
+    }
 
     // Initialize AdMob
     await FirebaseAdMob.instance.initialize(appId: _APP_ID, analyticsEnabled: analytics);
@@ -58,7 +83,7 @@ class Ads {
     AnchorType anchorType = AnchorType.bottom}) async{
 
     bannerAd = BannerAd(
-        adUnitId: _BANNER_ID,
+        adUnitId: _ANDROID_BANNER_ID,
         size: adSize,
         targetingInfo: _mobileTargetingInfo,
         listener: (MobileAdEvent mobileAdEvent){
@@ -93,7 +118,7 @@ class Ads {
   static Future<void> loadInterstitial() async {
 
     interstitialAd = InterstitialAd(
-      adUnitId: _INTERSTITIAL_ID,
+      adUnitId: _ANDROID_INTERSTITIAL_ID,
       targetingInfo: _mobileTargetingInfo,
       listener: (MobileAdEvent mobileAdEvent){
 
@@ -129,7 +154,7 @@ class Ads {
   static Future<void> loadRewardedVideo({Function onRewarded}) async {
 
     await RewardedVideoAd.instance.load(
-        adUnitId: _REWARDED_ID, targetingInfo: _mobileTargetingInfo
+        adUnitId: _ANDROID_REWARDED_ID, targetingInfo: _mobileTargetingInfo
     );
 
     RewardedVideoAd.instance.listener =
@@ -144,7 +169,7 @@ class Ads {
       if(event == RewardedVideoAdEvent.closed){
 
         // Retrieve a new Rewarded Video Ad when user close
-        RewardedVideoAd.instance.load(adUnitId: _REWARDED_ID);
+        RewardedVideoAd.instance.load(adUnitId: _ANDROID_REWARDED_ID);
 
       }
 
@@ -160,22 +185,43 @@ class Ads {
     RewardedVideoAd.instance.show();
   }
 
-  // ============ Native Ad ==============
+  // ========= Get Real IDs ==============
 
-  /*
-  static NativeAd getNativeAd(){
-
-    return NativeAd(
-      //adUnitId: _NATIVE_ID,
-      factoryId: "",
-      targetingInfo: _mobileTargetingInfo,
-      listener: ((event){
-
-      })
-    );
+  static getAppId() {
+    if (Platform.isIOS) {
+      return _IOS_APP_ID;
+    } else if (Platform.isAndroid) {
+      return _ANDROID_APP_ID;
+    }
 
   }
-   */
+
+  static getBannerAdUnitId() {
+    if (Platform.isIOS) {
+      return _IOS_BANNER_ID;
+    } else if (Platform.isAndroid) {
+      return _ANDROID_BANNER_ID;
+    }
+  }
+
+  static getInterstitialAdUnitId() {
+    if (Platform.isIOS) {
+      return _IOS_INTERSTITIAL_ID;
+    } else if (Platform.isAndroid) {
+      return _ANDROID_INTERSTITIAL_ID;
+    }
+
+  }
+
+  static getRewardedAdUnitId() {
+    if (Platform.isIOS) {
+      return _IOS_REWARDED_ID;
+    } else if (Platform.isAndroid) {
+      return _ANDROID_REWARDED_ID;
+    }
+
+  }
+
 
  // ============ Test Ad Unit Ids ==============
 

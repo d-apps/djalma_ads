@@ -1,3 +1,5 @@
+## [0.2.8] - Added iOS support.
+
 ## [0.1.8] - Fixed Future methods returning dynamic to void
 
 ## [0.1.7] - Fixed rea dme.

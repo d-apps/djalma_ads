@@ -14,7 +14,9 @@ void main() async{
 
   // No Ad Units were passed, Test Ad Units will be used instead
   await Ads.init(
-    ["FC24EF68A748928ED0DBB45F3B2DA749"], // List of Test Devices ID
+    targetingInfo: MobileAdTargetingInfo(
+      testDevices: ["FC24EF68A748928ED0DBB45F3B2DA749"],
+    ),
     debug: true,
   );
 
