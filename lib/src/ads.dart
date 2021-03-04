@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'package:djalma_ads/djalma_ads.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class Ads {
 
@@ -23,23 +22,33 @@ class Ads {
   static String _ANDROID_REWARDED_ID = "";
   // ignore: non_constant_identifier_names
   static String _IOS_REWARDED_ID = "";
+  // ignore: non_constant_identifier_names
+  static String _ANDROID_NATIVE_ID = "";
+  // ignore: non_constant_identifier_names
+  static String _IOS_NATIVE_ID = "";
 
   static bool _debug = false; // If debug is true, Ads listeners will print Ad events.
 
-  static MobileAdTargetingInfo _mobileTargetingInfo = MobileAdTargetingInfo(); // TargetingInfo
+  static AdRequest _adRequest;
+  static BannerAd _bannerAd;
+  static InterstitialAd _interstitialAd;
+  static NativeAd _nativeAd;
+  static RewardedAd _rewardedAd;
 
   static Future<void> init({
     String androidAppId = "",
     String androidBannerId = "",
     String androidInterstitialId = "",
     String androidRewardedId = "",
+    String androidNativeId = "",
     String iosAppId = "",
     String iosBannerId = "",
     String iosInterstitialId = "",
     String iosRewardedId = "",
+    String iosNativeId = "",
     bool analytics = false,
     bool debug = false,
-    MobileAdTargetingInfo targetingInfo,
+    AdRequest adRequest = const AdRequest()
     }) async {
 
     // Set id for all type of ads
@@ -48,15 +57,13 @@ class Ads {
     _ANDROID_BANNER_ID = androidBannerId.isEmpty ? getBannerTestAdUnitId() : androidBannerId;
     _ANDROID_INTERSTITIAL_ID = androidInterstitialId.isEmpty ? getInterstitialTestAdUnitId() : androidInterstitialId;
     _ANDROID_REWARDED_ID = androidRewardedId.isEmpty ? getRewardedTestAdUnitId() : androidRewardedId;
+    _ANDROID_NATIVE_ID = androidNativeId.isEmpty ? getNativeTestAdUnitId() : androidNativeId;
 
     _IOS_APP_ID = iosAppId.isEmpty ? getAppTestId() : iosAppId;
     _IOS_BANNER_ID = iosBannerId.isEmpty ? getBannerTestAdUnitId() : iosBannerId;
     _IOS_INTERSTITIAL_ID = iosInterstitialId.isEmpty ? getInterstitialTestAdUnitId() : iosInterstitialId;
     _IOS_REWARDED_ID = iosRewardedId.isEmpty ? getRewardedTestAdUnitId() : iosRewardedId;
-
-    if(targetingInfo != null){
-      _mobileTargetingInfo = targetingInfo;
-    }
+    _IOS_NATIVE_ID = iosNativeId.isEmpty ? getNativeTestAdUnitId() : iosNativeId;
 
     Ads._debug = debug;
 
@@ -66,124 +73,195 @@ class Ads {
       _APP_ID = iosAppId.isEmpty ? getAppTestId() : iosAppId;
     }
 
+    _adRequest = adRequest;
+
     // Initialize AdMob
-    await FirebaseAdMob.instance.initialize(appId: _APP_ID, analyticsEnabled: analytics);
+    await MobileAds.instance.initialize();
 
   }
 
   // ======== Banner Ad =========
 
-  static BannerAd bannerAd;
-  static InterstitialAd interstitialAd;
+  static Future<void> loadBanner({AdSize adSize}) async{
 
-  static Future<void> showBanner({
-    AdSize adSize = AdSize.smartBanner,
-    double anchorOffset = 0,
-    double horizontalCenterOffset = 0,
-    AnchorType anchorType = AnchorType.bottom}) async{
-
-    bannerAd = BannerAd(
-        adUnitId: _ANDROID_BANNER_ID,
-        size: adSize,
-        targetingInfo: _mobileTargetingInfo,
-        listener: (MobileAdEvent mobileAdEvent){
+    _bannerAd = BannerAd(
+      adUnitId: getBannerAdUnitId(),
+      size: adSize ?? AdSize.smartBanner,
+      request: _adRequest,
+      listener: AdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (Ad ad) {
 
           if(_debug){
-            print("Banner event: $mobileAdEvent");
+            print('Ad loaded.');
           }
 
-        }
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+
+          if(_debug){
+            print('Ad failed to load: $error');
+          }
+
+        },
+        // Called when an ad opens an overlay that covers the screen.
+        onAdOpened: (Ad ad) {
+
+          if(_debug){
+            print('Ad opened.');
+          }
+
+        },
+        // Called when an ad removes an overlay that covers the screen.
+        onAdClosed: (Ad ad) {
+
+          if(_debug){
+            print('Ad closed.');
+          }
+
+        },
+        // Called when an ad is in the process of leaving the application.
+        onApplicationExit: (Ad ad) {
+
+          if(_debug){
+            print('Left application.');
+          }
+
+        },
+      ),
     );
 
-    await bannerAd.load();
+    await _bannerAd.load();
 
-    bannerAd.show(
-        anchorOffset: anchorOffset, // Posição Y
-        anchorType: anchorType, // Where the ad will start
-        horizontalCenterOffset: horizontalCenterOffset // Posição X
-    );
 
   }
 
-  static void closeBanner(){
+  static Widget getBannerWidget(Key key) {
 
-    if(bannerAd != null){
-      bannerAd.dispose();
-    }
+    return AdWidget(ad: _bannerAd, key: key);
 
   }
 
-  // ========= Interstitial Ad ===========
+  // ============ Interstitial Ad ==============
 
   static Future<void> loadInterstitial() async {
 
-    interstitialAd = InterstitialAd(
-      adUnitId: _ANDROID_INTERSTITIAL_ID,
-      targetingInfo: _mobileTargetingInfo,
-      listener: (MobileAdEvent mobileAdEvent){
+    _interstitialAd = InterstitialAd(
+      adUnitId: getInterstitialAdUnitId(),
+      request: _adRequest,
+      listener: AdListener(
+        onAdLoaded: (Ad ad) {
 
-        if(mobileAdEvent == MobileAdEvent.closed){
+          if(_debug){
+            print('${ad.runtimeType} loaded.');
+          }
+
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          if(_debug){
+            print('${ad.runtimeType} failed to load: $error.');
+          }
+          ad.dispose();
+          _interstitialAd = null;
           loadInterstitial();
+        },
+        onAdOpened: (Ad ad) => print('${ad.runtimeType} onAdOpened.'),
+        onAdClosed: (Ad ad) {
+          if(_debug){
+            print('${ad.runtimeType} closed.');
+          }
+          ad.dispose();
+          loadInterstitial();
+        },
+        onApplicationExit: (Ad ad) {
+          if(_debug){
+            print('${ad.runtimeType} onApplicationExit.');
+          }
         }
-
-        if(_debug){
-          print("Interstitial event: $mobileAdEvent");
-        }
-      }
+      ),
     );
 
-    await interstitialAd.load();
+    await _interstitialAd.load();
 
   }
 
-  static void showInterstitial({
-    double anchorOffset = 0,
-    double horizontalCenterOffset = 0,
-    AnchorType anchorType = AnchorType.bottom}){
+  static void showInterstitial() {
 
-    interstitialAd.show(
-        anchorOffset: anchorOffset,
-        anchorType: anchorType,
-        horizontalCenterOffset: horizontalCenterOffset
-    );
+    _interstitialAd.show();
 
   }
+
+  Future<void> loadNative() async{
+
+    _nativeAd = NativeAd(
+      adUnitId: getNativeTestAdUnitId(),
+      request: _adRequest,
+      factoryId: 'adFactoryExample',
+      listener: AdListener(
+        onAdLoaded: (Ad ad) {
+          print('$NativeAd loaded.');
+
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          print('$NativeAd failedToLoad: $error');
+
+        },
+        onAdOpened: (Ad ad) => print('$NativeAd onAdOpened.'),
+        onAdClosed: (Ad ad) => print('$NativeAd onAdClosed.'),
+        onApplicationExit: (Ad ad) => print('$NativeAd onApplicationExit.'),
+      ),
+    );
+
+    await _nativeAd.load();
+
+  }
+
+  static Widget getNativeWidget(Key key){
+    return AdWidget(ad: _nativeAd, key: key);
+  }
+
+  // ============ Native Ad ==============
 
   // ============ Rewarded Ad ==============
 
+
   static Future<void> loadRewardedVideo({Function onRewarded}) async {
 
-    await RewardedVideoAd.instance.load(
-        adUnitId: _ANDROID_REWARDED_ID, targetingInfo: _mobileTargetingInfo
+    _rewardedAd = RewardedAd(
+      adUnitId: getRewardedAdUnitId(),
+      request: _adRequest,
+      listener: AdListener(
+        onAdFailedToLoad: (Ad ad, LoadAdError error){
+
+          if(_debug){
+            print("onAdFailedToLoad: ${error.message}");
+          }
+
+        },
+        onAdClosed: (Ad ad) {
+
+          if(_debug){
+            print("onAdClosed");
+          }
+
+        },
+        onRewardedAdUserEarnedReward: (RewardedAd ad, RewardItem reward) {
+          print(reward.type);
+          print(reward.amount);
+        },
+      ),
     );
 
-    RewardedVideoAd.instance.listener =
-        (RewardedVideoAdEvent event, {String rewardType = "coin", int rewardAmount = 0}){
 
-      if(event == RewardedVideoAdEvent.rewarded){
-        if(onRewarded != null){
-          onRewarded();
-        }
-      }
 
-      if(event == RewardedVideoAdEvent.closed){
-
-        // Retrieve a new Rewarded Video Ad when user close
-        RewardedVideoAd.instance.load(adUnitId: _ANDROID_REWARDED_ID);
-
-      }
-
-      if(_debug){
-        print("RewardedVideo event: $event");
-      }
-
-    };
 
   }
 
   static void showRewarded(){
-    RewardedVideoAd.instance.show();
+    _rewardedAd.show();
   }
+
 
   // ========= Get Real IDs ==============
 
@@ -218,6 +296,15 @@ class Ads {
       return _IOS_REWARDED_ID;
     } else if (Platform.isAndroid) {
       return _ANDROID_REWARDED_ID;
+    }
+
+  }
+
+  static getNativeAdUnitId() {
+    if (Platform.isIOS) {
+      return _IOS_NATIVE_ID;
+    } else if (Platform.isAndroid) {
+      return _ANDROID_NATIVE_ID;
     }
 
   }

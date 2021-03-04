@@ -1,7 +1,6 @@
 import 'dart:ui';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:djalma_ads/djalma_ads.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,11 +13,24 @@ void main() async{
 
   // No Ad Units were passed, Test Ad Units will be used instead
   await Ads.init(
-    targetingInfo: MobileAdTargetingInfo(
-      testDevices: ["FC24EF68A748928ED0DBB45F3B2DA749"],
+    adRequest: AdRequest(
+      testDevices: ["FC24EF68A748928ED0DBB45F3B2DA749"]
     ),
     debug: true,
   );
+
+  await Ads.loadBanner();
+  await Ads.loadInterstitial();
+  /*
+    Ads.loadRewardedVideo( onRewarded: () {
+
+      print("onRewarded!!!");
+      setState(() {
+        coins++;
+      });
+
+    });
+     */
 
   runApp(MyApp());
 }
@@ -49,22 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int coins = 0;
 
   @override
-  void initState() {
-
-    Ads.loadInterstitial();
-    Ads.loadRewardedVideo( onRewarded: () {
-
-      print("onRewarded!!!");
-      setState(() {
-        coins++;
-      });
-
-    });
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -89,58 +85,20 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
 
-              ElevatedButton(
-                child: Text("Close Banner"),
-                onPressed: ()=> Ads.closeBanner(),
-              ),
+              Text("SMART BANNER"),
+
+              Ads.getBannerWidget(Key("0")),
 
               ElevatedButton(
-                child: Text("Show Banner"),
-                onPressed: ()=> Ads.showBanner(
-                  adSize: AdSize.banner,
-                ),
+                child: Text("SHOW INTERSTITIAL"),
+                onPressed: (){
+                  Ads.showInterstitial();
+                },
               ),
 
-              ElevatedButton(
-                child: Text("Show Smart Banner"),
-                onPressed: ()=> Ads.showBanner(adSize: AdSize.smartBanner),
-              ),
+              Text("SMART BANNER"),
 
-              ElevatedButton(
-                child: Text("Show Medium Rectangle Banner"),
-                onPressed: ()=> Ads.showBanner(
-                  adSize: AdSize.mediumRectangle,
-                ),
-              ),
-
-              ElevatedButton(
-                child: Text("Show Full Banner"),
-                onPressed: ()=> Ads.showBanner(adSize: AdSize.fullBanner),
-              ),
-
-              ElevatedButton(
-                child: Text("Show Large Banner"),
-                onPressed: ()=> Ads.showBanner(adSize: AdSize.largeBanner),
-              ),
-
-              ElevatedButton(
-                child: Text("Show Leaderboard Banner"),
-                onPressed: ()=> Ads.showBanner(adSize: AdSize.leaderboard),
-              ),
-
-              ElevatedButton(
-                child: Text("Show Interstitial"),
-                onPressed: ()=> Ads.showInterstitial(
-                  anchorType: AnchorType.top,
-                  anchorOffset: 0,
-                  horizontalCenterOffset: 0
-                ),
-              ),
-
-              ElevatedButton(
-                child: Text("Show Rewarded"),
-                onPressed: ()=> Ads.showRewarded(),
-              ),
+              //Ads.getBannerWidget(Key("1")),
 
             ],
           ),
