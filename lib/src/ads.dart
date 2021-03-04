@@ -30,7 +30,7 @@ class Ads {
   static bool _debug = false; // If debug is true, Ads listeners will print Ad events.
 
   static AdRequest _adRequest;
-  static BannerAd _bannerAd;
+  //static BannerAd _bannerAd;
   static InterstitialAd _interstitialAd;
   static NativeAd _nativeAd;
   static RewardedAd _rewardedAd;
@@ -46,7 +46,6 @@ class Ads {
     String iosInterstitialId = "",
     String iosRewardedId = "",
     String iosNativeId = "",
-    bool analytics = false,
     bool debug = false,
     AdRequest adRequest = const AdRequest()
     }) async {
@@ -82,10 +81,12 @@ class Ads {
 
   // ======== Banner Ad =========
 
+  static Future<Widget> getBannerWidget(
+      {@required BuildContext context,
+        AdSize adSize,
+      }) async{
 
-  static Future<Widget> getBannerWidget({@required BuildContext context, AdSize adSize}) async{
-
-    _bannerAd = BannerAd(
+    BannerAd bannerAd = BannerAd(
       adUnitId: getBannerAdUnitId(),
       size: adSize ?? AdSize.smartBanner,
       request: _adRequest,
@@ -103,7 +104,7 @@ class Ads {
 
           if(_debug){
             print('Ad failed to load: $error');
-            _bannerAd.dispose();
+            //_bannerAd.dispose();
           }
 
         },
@@ -134,13 +135,13 @@ class Ads {
       ),
     );
 
-    await _bannerAd.load();
+    await bannerAd.load();
 
-    print("BANNER SIZE HEIGHT: ${_bannerAd.size.height}");
-    print("BANNER SIZE WIDTH: ${_bannerAd.size.width}");
+    print("BANNER SIZE HEIGHT: ${bannerAd.size.height}");
+    print("BANNER SIZE WIDTH: ${bannerAd.size.width}");
 
     return Container(
-        child: AdWidget(ad: _bannerAd),
+        child: AdWidget(ad: bannerAd),
         constraints: BoxConstraints(
           maxHeight: 90,
           maxWidth: MediaQuery.of(context).size.width,

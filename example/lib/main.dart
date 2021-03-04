@@ -1,15 +1,12 @@
 import 'dart:ui';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:djalma_ads/djalma_ads.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp();
 
   // No Ad Units were passed, Test Ad Units will be used instead
   await Ads.init(
@@ -85,10 +82,13 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
 
-              Text("SMART BANNER"),
+              Text("BANNER"),
 
               FutureBuilder<Widget>(
-                future: Ads.getBannerWidget(context: context),
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize.banner
+                ),
                 builder: (_, snapshot){
 
                   if(!snapshot.hasData){
@@ -108,16 +108,168 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              Text("LARGE BANNER"),
+
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize.largeBanner
+                ),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 100,
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
+
+              Text("MEDIUM RECTANGLE BANNER"),
+
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize.mediumRectangle
+                ),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 250,
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
+
+              Text("FULL BANNER"),
+
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize.fullBanner
+                ),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
+
+              Text("LEADERBOARD BANNER"),
+
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize.leaderboard
+                ),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 90,
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
+
+              Text("SMART BANNER"),
+
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize.banner
+                ),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 90, // 32 / 50 / 90
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
+
+              Text("CUSTOM SIZED BANNER 300x60"),
+
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(
+                    context: context,
+                    adSize: AdSize(width: 300, height: 60)
+                ),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 90, // 32 / 50 / 90
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
+
               ElevatedButton(
                 child: Text("SHOW INTERSTITIAL"),
                 onPressed: (){
                   Ads.showInterstitial();
                 },
               ),
-
-              Text("SMART BANNER"),
-
-              //Ads.getBannerWidget(Key("1")),
 
             ],
           ),
