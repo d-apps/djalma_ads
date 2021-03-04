@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-void main() async{
+void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -19,8 +19,8 @@ void main() async{
     debug: true,
   );
 
-  await Ads.loadBanner();
   await Ads.loadInterstitial();
+
   /*
     Ads.loadRewardedVideo( onRewarded: () {
 
@@ -87,7 +87,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
               Text("SMART BANNER"),
 
-              Ads.getBannerWidget(Key("0")),
+              FutureBuilder<Widget>(
+                future: Ads.getBannerWidget(context: context),
+                builder: (_, snapshot){
+
+                  if(!snapshot.hasData){
+
+                    return Text("Carregando...");
+
+                  } else {
+
+                    return Container(
+                      height: 50,
+                      width: MediaQuery.of(context).size.width,
+                      child: snapshot.data,
+                    );
+
+                  }
+
+                },
+              ),
 
               ElevatedButton(
                 child: Text("SHOW INTERSTITIAL"),

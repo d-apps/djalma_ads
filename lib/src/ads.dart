@@ -82,7 +82,8 @@ class Ads {
 
   // ======== Banner Ad =========
 
-  static Future<void> loadBanner({AdSize adSize}) async{
+
+  static Future<Widget> getBannerWidget({@required BuildContext context, AdSize adSize}) async{
 
     _bannerAd = BannerAd(
       adUnitId: getBannerAdUnitId(),
@@ -102,6 +103,7 @@ class Ads {
 
           if(_debug){
             print('Ad failed to load: $error');
+            _bannerAd.dispose();
           }
 
         },
@@ -134,12 +136,18 @@ class Ads {
 
     await _bannerAd.load();
 
+    print("BANNER SIZE HEIGHT: ${_bannerAd.size.height}");
+    print("BANNER SIZE WIDTH: ${_bannerAd.size.width}");
 
-  }
-
-  static Widget getBannerWidget(Key key) {
-
-    return AdWidget(ad: _bannerAd, key: key);
+    return Container(
+        child: AdWidget(ad: _bannerAd),
+        constraints: BoxConstraints(
+          maxHeight: 90,
+          maxWidth: MediaQuery.of(context).size.width,
+          minHeight: 32,
+          minWidth: MediaQuery.of(context).size.width,
+        ),
+    );
 
   }
 
