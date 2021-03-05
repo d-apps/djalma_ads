@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:example/banner_native_ad_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:djalma_ads/djalma_ads.dart';
 import 'package:flutter/material.dart';
@@ -75,14 +76,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.only(bottom: Ads.getMargin(context)),
+        padding: EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
 
               Text("BANNER"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -108,7 +110,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               Text("LARGE BANNER"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -134,7 +140,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               Text("MEDIUM RECTANGLE BANNER"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -160,7 +170,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               Text("FULL BANNER"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -186,7 +200,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               Text("LEADERBOARD BANNER"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -212,7 +230,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               Text("SMART BANNER"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -238,7 +260,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               Text("CUSTOM SIZED BANNER 300x60"),
+
+              SizedBox(height: 15),
 
               FutureBuilder<Widget>(
                 future: Ads.getBannerWidget(
@@ -264,10 +290,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
 
+              SizedBox(height: 15),
+
               ElevatedButton(
                 child: Text("SHOW INTERSTITIAL"),
                 onPressed: (){
                   Ads.showInterstitial();
+                },
+              ),
+
+              SizedBox(height: 15),
+
+              ElevatedButton(
+                child: Text("BANNER AS NATIVE ADS"),
+                onPressed: (){
+
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => BannerNativeAdScreen())
+                  );
+
                 },
               ),
 

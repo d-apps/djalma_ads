@@ -137,17 +137,16 @@ class Ads {
 
     await bannerAd.load();
 
-    print("BANNER SIZE HEIGHT: ${bannerAd.size.height}");
-    print("BANNER SIZE WIDTH: ${bannerAd.size.width}");
+    //print("BANNER SIZE HEIGHT: ${bannerAd.size.height}");
+    //print("BANNER SIZE WIDTH: ${bannerAd.size.width}");
+
+    print("AD SIZE HEIGHT: ${adSize.height}");
+    print("AD SIZE WIDTH: ${adSize.width}");
 
     return Container(
+        height: adSize.height.toDouble(),
+        width: adSize.width.toDouble(),
         child: AdWidget(ad: bannerAd),
-        constraints: BoxConstraints(
-          maxHeight: 90,
-          maxWidth: MediaQuery.of(context).size.width,
-          minHeight: 32,
-          minWidth: MediaQuery.of(context).size.width,
-        ),
     );
 
   }
