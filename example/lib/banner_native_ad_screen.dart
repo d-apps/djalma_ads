@@ -25,7 +25,7 @@ class BannerNativeAdScreen extends StatelessWidget {
                 ),
 
                 index != 0 && index % 4 == 0 ?
-                BannerNativeAdWidget(AdSize.smartBanner) :
+                BannerNativeAdWidget(AdSize.banner) :
                 SizedBox.shrink()
 
               ],

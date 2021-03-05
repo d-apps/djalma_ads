@@ -61,8 +61,8 @@ class _BannerNativeAdWidgetState extends State<BannerNativeAdWidget> with Automa
       visible: loaded,
       child: Container(
         alignment: Alignment.center,
-        width: widget.adSize.width.toDouble(),
-        height: widget.adSize.height.toDouble(),
+        width: 468,
+        height: 60,
         child: AdWidget(
           ad: bannerAd,
         )
